@@ -1,0 +1,355 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <!-- ── PWA: Manifest ─────────────────────────────────────────────── -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- ── PWA: Android / Chrome ─────────────────────────────────────── -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#059669">
+  <meta name="application-name" content="POS Ventas">
+
+  <!-- ── PWA: iOS / Safari ─────────────────────────────────────────── -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="POS Ventas">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
+  <!-- Tamaños explícitos para dispositivos iOS legados -->
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon.svg">
+  <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon.svg">
+
+  <!-- ── SEO / General ──────────────────────────────────────────────── -->
+  <meta name="description" content="Sistema de punto de venta para pequeños negocios. Gestiona ventas, clientes e inventario.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <title>POS Ventas - Tienda Mexico</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Html5-QRCode Library for barcode scanning -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+
+<body>
+  <!-- Main App Container -->
+  <div id="app">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <h1 class="app-title">
+          <span class="icon">🏪</span>
+          POS Ventas
+        </h1>
+        <div class="header-actions">
+          <button class="btn-icon" id="btnThemeToggle" title="Cambiar Tema" aria-label="Cambiar Tema">
+            <span id="themeIcon" aria-hidden="true">○</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Views -->
+    <main class="app-main">
+      <!-- SALES VIEW -->
+      <div id="viewSales" class="view active">
+        <div class="view-header">
+          <div class="search-container">
+            <input type="text" id="searchProducts" class="search-input" placeholder="🔍 Buscar productos..."
+              autocomplete="off" aria-label="Buscar productos">
+            <button class="btn-scan" id="btnScan" aria-label="Escanear código de barras">
+              <span aria-hidden="true">📷</span>
+              <span>Escanear</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="sales-container">
+          <!-- Products Grid -->
+          <div class="products-section">
+            <div id="productsGrid" class="products-grid">
+              <!-- Products will be rendered here -->
+            </div>
+          </div>
+
+          <!-- Shopping Cart -->
+          <div class="cart-section" id="cartSection">
+            <div class="cart-header">
+              <h2>Carrito</h2>
+              <button class="btn-clear" id="btnClearCart">Limpiar</button>
+            </div>
+            <div class="cart-items" id="cartItems">
+              <p class="cart-empty">Carrito vacío</p>
+            </div>
+            <div class="cart-total">
+              <div class="total-row">
+                <span>Total:</span>
+                <span class="total-amount" id="cartTotal">S/.0.00</span>
+              </div>
+            </div>
+            <div class="cart-actions">
+              <button class="btn-primary btn-cash" id="btnPayCash">
+
+                COBRAR
+              </button>
+              <button class="btn-warning btn-credit" id="btnPayCredit">
+
+                FIAR
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENTS VIEW -->
+      <div id="viewClients" class="view">
+        <div class="view-header">
+          <div class="header-row">
+            <h2>Clientes</h2>
+            <button class="btn-primary btn-sm" id="btnAddClient">
+              <span>➕</span> Nuevo Cliente
+            </button>
+          </div>
+          <input type="text" id="searchClients" class="search-input" placeholder="🔍 Buscar clientes..."
+            aria-label="Buscar clientes">
+        </div>
+        <div id="clientsList" class="clients-list">
+          <!-- Clients will be rendered here -->
+        </div>
+      </div>
+
+      <!-- PRODUCTS VIEW -->
+      <div id="viewProducts" class="view">
+        <div class="view-header">
+          <div class="header-row">
+            <h2>Inventario</h2>
+            <button class="btn-primary btn-sm" id="btnAddProduct">
+              <span>➕</span> Nuevo Producto
+            </button>
+          </div>
+          <input type="text" id="searchInventory" class="search-input" placeholder="🔍 Buscar en inventario..."
+            aria-label="Buscar en inventario">
+        </div>
+        <div id="inventoryList" class="inventory-list">
+          <!-- Products inventory will be rendered here -->
+        </div>
+      </div>
+
+      <!-- STATS VIEW -->
+      <div id="viewStats" class="view">
+        <div class="view-header">
+          <h2>Estadísticas</h2>
+          <div class="stats-filters">
+            <button class="filter-btn active" data-period="week">Esta Semana</button>
+            <button class="filter-btn" data-period="month">Este Mes</button>
+            <button class="filter-btn" data-period="all">Todos</button>
+          </div>
+        </div>
+        <div id="statsContent" class="stats-content">
+          <!-- Stats will be rendered here -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-view="sales" aria-label="Ver Ventas">
+        <span class="nav-icon" aria-hidden="true">🛒</span>
+        <span class="nav-label">Ventas</span>
+      </button>
+      <button class="nav-item" data-view="clients" aria-label="Ver Clientes">
+        <span class="nav-icon" aria-hidden="true">👨‍💼</span>
+        <span class="nav-label">Clientes</span>
+      </button>
+      <button class="nav-item" data-view="products" aria-label="Ver Productos">
+        <span class="nav-icon" aria-hidden="true">📦</span>
+        <span class="nav-label">Productos</span>
+      </button>
+      <button class="nav-item" data-view="stats" aria-label="Ver Reportes">
+        <span class="nav-icon" aria-hidden="true">📊</span>
+        <span class="nav-label">Reportes</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- Scanner Modal -->
+  <div id="scannerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="scannerModalTitle">
+    <div class="modal-content modal-scanner">
+      <div class="modal-header">
+        <h3 id="scannerModalTitle">Escanear Código</h3>
+        <button class="btn-close" data-modal="scanner" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="scannerReader"></div>
+        <p class="scanner-info">Apunta la cámara al código de barras</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Form Modal -->
+  <div id="productModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="productModalTitle">Agregar Producto</h3>
+        <button class="btn-close" data-modal="product" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm">
+          <input type="hidden" id="productId">
+          <div class="form-group">
+            <label for="productCode">Código de Barras</label>
+            <input type="text" id="productCode" required>
+          </div>
+          <div class="form-group">
+            <label for="productName">Nombre del Producto</label>
+            <input type="text" id="productName" required>
+          </div>
+          <div class="form-group">
+            <label for="productPrice">Precio</label>
+            <input type="number" id="productPrice" step="0.01" min="0" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" data-modal="product">Cancelar</button>
+            <button type="submit" class="btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Form Modal -->
+  <div id="clientModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="clientModalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="clientModalTitle">Agregar Cliente</h3>
+        <button class="btn-close" data-modal="client" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="clientForm">
+          <input type="hidden" id="clientId">
+          <div class="form-group">
+            <label for="clientName">Nombre</label>
+            <input type="text" id="clientName" required>
+          </div>
+          <div class="form-group">
+            <label for="clientPhone">Teléfono (opcional)</label>
+            <input type="tel" id="clientPhone">
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" data-modal="client">Cancelar</button>
+            <button type="submit" class="btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Detail Modal -->
+  <div id="clientDetailModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="clientDetailName">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="clientDetailName">Cliente</h3>
+        <button class="btn-close" data-modal="clientDetail" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="client-detail-info">
+          <div class="debt-summary">
+            <span>Deuda Total:</span>
+            <span class="debt-amount" id="clientDetailDebt">S/.0.00</span>
+          </div>
+        </div>
+        <div class="client-notes">
+          <h4>Historial de Deudas</h4>
+          <div id="clientNotesList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Select Client Modal (for credit sales) -->
+  <div id="selectClientModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="selectClientModalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="selectClientModalTitle">Seleccionar Cliente</h3>
+        <button class="btn-close" data-modal="selectClient" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="searchClientSelect" class="search-input" placeholder="🔍 Buscar cliente..."
+          aria-label="Buscar cliente para seleccionar">
+        <div id="selectClientList" class="select-client-list">
+          <!-- Client list for selection -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="paymentModalTitle">Registrar Pago</h3>
+        <button class="btn-close" data-modal="payment" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentForm">
+          <input type="hidden" id="paymentClientId">
+          <input type="hidden" id="paymentNoteId">
+          <div class="form-group">
+            <label>Pendiente:</label>
+            <p class="payment-pending" id="paymentPending">S/.0.00</p>
+          </div>
+          <div class="form-group">
+            <label for="paymentAmount">Monto a Pagar</label>
+            <input type="number" id="paymentAmount" step="0.01" min="0" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" data-modal="payment">Cancelar</button>
+            <button type="submit" class="btn-primary">Registrar Pago</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/sales.js"></script>
+  <script src="js/clients.js"></script>
+  <script src="js/scanner.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="app.js"></script>
+
+  <!-- ── Service Worker + PWA ───────────────────────────────────────── -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('[PWA] Service Worker registrado:', reg.scope);
+        }).catch((err) => {
+          console.warn('[PWA] Error al registrar SW:', err);
+        });
+      });
+    }
+
+    // Soporte para shortcuts del manifest (?view=sales|clients|…)
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const view = params.get('view');
+      if (view && ['sales', 'clients', 'products', 'stats'].includes(view)) {
+        // App.init() ya habrá corrido; solo cambiamos la vista
+        requestAnimationFrame(() => App.switchView(view));
+      }
+    });
+  </script>
+</body>
+
+</html>
